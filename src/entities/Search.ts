@@ -1,4 +1,5 @@
 import {
+    Check,
     Column,
     CreateDateColumn,
     Entity,
@@ -20,13 +21,15 @@ export class Search {
     /**
      * Latitud of the search
      */
-    @Column()
+    @Column('numeric')
+    @Check("latitude <> 'NaN'")
     latitude: number;
 
     /**
      * Longitude of the search
      */
-    @Column()
+    @Column('numeric')
+    @Check("longitude <> 'NaN'")
     longitude: number;
 
     /**
@@ -49,11 +52,11 @@ export class Search {
     user: User;
 
 
-    constructor(payload?: { latitud: number; longitude: number; city: string; }) {
+    constructor(payload?: { latitude: number; longitude: number; city?: string; }) {
         if (payload) {
-            this.latitude = payload.latitud;
+            this.latitude = payload.latitude;
             this.longitude = payload.longitude;
-            this.city = payload.city;
+            this.city = payload.city || null;
         }
     }
 }

@@ -1,5 +1,18 @@
 import { protos, PlacesClient } from "@googlemaps/places";
 
+class GooglePlaceReataurantResponse {
+    address: string;
+    name: string;
+    location: {
+        latitude: number;
+        longitude: number;
+    };
+    constructor(address: string, name: string, location: { latitude: number; longitude: number }) {
+        this.address = address;
+        this.name = name;
+        this.location = location;
+    }
+}
 export class GooglePlacesAdapter {
 
     private static instance: GooglePlacesAdapter | null = null;
@@ -20,38 +33,66 @@ export class GooglePlacesAdapter {
         return this.instance;
     }
 
-    public async fetchRestaurantsWithTextSearch(city: string): Promise<protos.google.maps.places.v1.ISearchNearbyResponse> {
+    public async fetchRestaurantsWithTextSearch(city: string): Promise<GooglePlaceReataurantResponse[] | undefined> {
         const [response, _] = await this.googlePlacesClient.searchText({
             textQuery: "Restaurants nearby " + city,
+            includedType: 'restaurant',
             maxResultCount: 10,
         }, {
             otherArgs: {
                 headers: {
-                    'X-Goog-FieldMask': '*'
+                    'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.location'
                 }
             }
         });
 
-        return response
+        return response.places?.map((place) => {
+            return new GooglePlaceReataurantResponse(
+                place.formattedAddress || "",
+                place.displayName.text || "",
+                {
+                    latitude: place.location?.latitude || 0,
+                    longitude: place.location?.longitude || 0,
+                }
+            )
+        })
     }
 
-    public async fetchRestaurantsWithNearbySearch(latitude: number, longitude: number): Promise<protos.google.maps.places.v1.ISearchNearbyResponse> {
-        const [response, _] = await this.googlePlacesClient.searchNearby({
-            includedTypes: ['restaurant'],
-            maxResultCount: 10,
-            locationRestriction: {
-                circle: {
-                    center: {
-                        latitude: latitude,
-                        longitude: longitude,
+    public async fetchRestaurantsWithNearbySearch(latitude: number, longitude: number): Promise<GooglePlaceReataurantResponse[] | undefined> {
+        const [response, _] = await this.googlePlacesClient.searchNearby(
+            {
+                includedTypes: ['restaurant'],
+                maxResultCount: 10,
+                locationRestriction: {
+                    circle: {
+                        center: {
+                            latitude: latitude,
+                            longitude: longitude,
+                        },
+                        radius: 1000,
                     },
-                    radius: 1000,
                 },
+                rankPreference: "DISTANCE",
             },
-            rankPreference: "DISTANCE",
-        });
+            {
+                otherArgs: {
+                    headers: {
+                        'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.location'
+                    }
+                }   
+            }
+        );
 
-        return response
+        return response.places?.map((place) => {
+            return new GooglePlaceReataurantResponse(
+                place.formattedAddress || "",
+                place.displayName.text || "",
+                {
+                    latitude: place.location?.latitude || 0,
+                    longitude: place.location?.longitude || 0,
+                }
+            )
+        })
     }
 
 }

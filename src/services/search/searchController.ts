@@ -2,6 +2,10 @@ import { Router } from 'express';
 import { AppService, AppServicePath, Controller } from '../../common/appCommonTypes';
 import SearchService from './searchService';
 
+enum SearchRoutes {
+    HISTORY = '/history',
+}
+
 export class SearchController implements Controller {
     path: string;
     router: Router;
@@ -21,6 +25,7 @@ export class SearchController implements Controller {
      */
     public initializeRoutes(): void {
         this.router.post(this.path, this.searchService.submitSearch);
+        this.router.get(this.path.concat(SearchRoutes.HISTORY), this.searchService.getSearches);
     }
 
     /**
