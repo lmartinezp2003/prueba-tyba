@@ -1,0 +1,179 @@
+{
+	"info": {
+		"_postman_id": "4316f5aa-91d3-43f3-bead-58e9f0b5c420",
+		"name": "Prueba Tyba",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "44606154"
+	},
+	"item": [
+		{
+			"name": "User signUp",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = JSON.parse(responseBody);",
+							"postman.setEnvironmentVariable(\"Auth\", jsonData.token);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"username\": \"lau123\",\n    \"email\": \"lau123@yopmail.com\",\n    \"password\": \"123456789abcd\",\n    \"passwordConfirmation\": \"123456789abcd\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{basicUrl}}/users/register",
+					"host": [
+						"{{basicUrl}}"
+					],
+					"path": [
+						"users",
+						"register"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User logIn",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"const jsonData = JSON.parse(responseBody);",
+							"postman.setEnvironmentVariable(\"Auth\", jsonData.token);"
+						],
+						"type": "text/javascript",
+						"packages": {}
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"lau123@yopmail.com\",\n    \"password\": \"123456789abcd\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{basicUrl}}/users/logIn",
+					"host": [
+						"{{basicUrl}}"
+					],
+					"path": [
+						"users",
+						"logIn"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Searches",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{Auth}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"longitude\": -74.0766,\n    \"latitude\": 4.6048\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{basicUrl}}/searches",
+					"host": [
+						"{{basicUrl}}"
+					],
+					"path": [
+						"searches"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User logOut",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{Auth}}",
+						"type": "text"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"email\": \"lau123@yopmail.com\",\n    \"password\": \"123456789abcd\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{basicUrl}}/users/logOut",
+					"host": [
+						"{{basicUrl}}"
+					],
+					"path": [
+						"users",
+						"logOut"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "User History",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "{{Auth}}",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "{{basicUrl}}/searches/history",
+					"host": [
+						"{{basicUrl}}"
+					],
+					"path": [
+						"searches",
+						"history"
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

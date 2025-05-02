@@ -3,6 +3,7 @@ import {
     Column,
     CreateDateColumn,
     Entity,
+    Index,
     JoinColumn,
     ManyToOne,
     PrimaryGeneratedColumn,
@@ -17,6 +18,10 @@ export class Search {
      */
     @PrimaryGeneratedColumn('uuid')
     id: string;
+
+    @Index()
+    @Column()
+    userId: string;
 
     /**
      * Latitud of the search
@@ -52,8 +57,9 @@ export class Search {
     user: User;
 
 
-    constructor(payload?: { latitude: number; longitude: number; city?: string; }) {
+    constructor(payload?: { userId: string; latitude: number; longitude: number; city?: string; }) {
         if (payload) {
+            this.userId = payload.userId;
             this.latitude = payload.latitude;
             this.longitude = payload.longitude;
             this.city = payload.city || null;

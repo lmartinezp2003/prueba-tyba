@@ -21,7 +21,7 @@ export default class SearchService {
             roles: [UserRoles.USER],
             validateToken: true,
             handler: async (req: AuthRequest, res: Response, manager: EntityManager) => {
-
+                const { userId } = req.decodedToken;
                 const { latitude, longitude, city } = req.body;
                 const google_places_adapter = GooglePlacesAdapter.getInstance();
 
@@ -32,6 +32,7 @@ export default class SearchService {
 
                     const closesPlace = places[0].location;
                     const newSearch = new Search({
+                        userId: userId,
                         latitude: closesPlace.latitude,
                         longitude: closesPlace.longitude,
                         city: req.body.city,
@@ -51,6 +52,7 @@ export default class SearchService {
                     )
 
                     const newSearch = new Search({
+                        userId: userId,
                         latitude: req.body.latitude,
                         longitude: req.body.longitude,
                     })
@@ -77,12 +79,11 @@ export default class SearchService {
             queryValidation: getUserSearchesValidationSchema,
             handler: async (req: AuthRequest, res: Response, manager: EntityManager) => {
                 const { page } = req.query;
-                const user_id = req.decodedToken.userId;
+                const { userId } = req.decodedToken;
+
                 const searches = await manager.find(Search, {
                     where: {
-                        user: {
-                            id: user_id,
-                        },
+                        userId: userId,
                     },
                     order: {
                         createdAt: 'DESC',
