@@ -1,0 +1,35 @@
+{
+  "name": "prueba-tyba",
+  "version": "1.0.0",
+  "description": "backend prueba junior dev tyba",
+  "main": "index.js",
+  "scripts": {
+    "start": "npm run build && cross-env NODE_PATH=./dist && ts-node src/server.ts",
+    "build": "rm -rf ./dist && mkdir dist && tsc",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "db-migrations": "npm run build && npx ts-node ./node_modules/typeorm/cli migration:run -d ./src/database/db.config.ts"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "axios": "^1.9.0",
+    "bcrypt": "^5.1.1",
+    "chance": "^1.1.12",
+    "cors": "^2.8.5",
+    "cross-env": "^7.0.3",
+    "dotenv": "^16.5.0",
+    "express": "^5.1.0",
+    "joi": "^17.13.3",
+    "jsonwebtoken": "^9.0.2",
+    "pg": "^8.15.6",
+    "typeorm": "^0.3.22",
+    "typeorm-naming-strategies": "^4.1.0"
+  },
+  "devDependencies": {
+    "@types/chance": "^1.1.6",
+    "@types/express": "^5.0.1",
+    "@types/node": "^22.15.3",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.8.3"
+  }
+}
