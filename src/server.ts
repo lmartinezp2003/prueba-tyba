@@ -1,9 +1,9 @@
 import 'dotenv/config';
 import App from './app';
-import { AppService } from './common/appCommonTypes';
 import { UserController } from './services/user/userController';
+import { SearchController } from './services/search/searchController';
 
-const app = new App([new UserController()]);
+const app = new App([new UserController(), new SearchController()]);
 
 // IIFE to start the server
 (async () => {

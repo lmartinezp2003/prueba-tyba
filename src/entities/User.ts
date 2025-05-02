@@ -1,5 +1,6 @@
 import { Chance } from 'chance';
-import { Column, CreateDateColumn, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, CreateDateColumn, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { Search } from './Search';
 
 /**
  * Enum of the available roles for a user
@@ -43,6 +44,12 @@ export class User {
      */
     @CreateDateColumn()
     createdAt: Date;
+
+    /**
+     * Searches of the user
+     */
+    @OneToMany(() => Search, (search) => search.user)
+    searches: Search[];
 
     constructor(payload?: { username?: string | null; email: string; password: string; role: UserRoles }) {
         if (payload) {

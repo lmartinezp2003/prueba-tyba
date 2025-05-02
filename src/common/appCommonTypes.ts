@@ -1,11 +1,13 @@
 import { Router } from "express";
 import { UserController } from "../services/user/userController";
+import { SearchController } from '../services/search/searchController';
 
 /**
  * Available services in the app
  */
 export enum AppService {
   USER = "user",
+  SEARCH = "/searches",
 }
 
 /**
@@ -13,8 +15,7 @@ export enum AppService {
  */
 export enum AppServicePath {
   USER = "/users",
-  MOVIE = "/movies",
-  REVIEW = "/reviews",
+  SEARCH = "/searches",
 }
 
 /**
@@ -22,6 +23,7 @@ export enum AppServicePath {
  */
 export type AppController = {
   [AppService.USER]: UserController;
+  [AppService.SEARCH]: SearchController;
 };
 
 /**
