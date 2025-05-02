@@ -5,6 +5,7 @@ import UsersService from './userService';
 enum UserRoutes {
     REGISTER = '/register',
     LOGIN = '/logIn',
+    LOGOUT = '/logOut'
 }
 
 export class UserController implements Controller {
@@ -27,6 +28,7 @@ export class UserController implements Controller {
     public initializeRoutes() {
         this.router.post(this.path.concat(UserRoutes.REGISTER), this.usersService.register);
         this.router.post(this.path.concat(UserRoutes.LOGIN), this.usersService.logIn);
+        this.router.post(this.path.concat(UserRoutes.LOGOUT), this.usersService.logout);
     }
 
     /**

@@ -4,16 +4,10 @@ import * as J from 'joi';
 import { EntityManager } from 'typeorm';
 import { AuthRequest } from '../../common/authCommonTypes';
 import { UserRoles } from '../../entities/User';
-import { middleware } from '../../middleware/auth';
+import { serviceAuthWrapper } from '../../wrapper/auth';
+import { GooglePlacesAdapter } from '../../utils/google';
 
 export default class SearchService {
-    /**
-     * @api {POST} /searches Submits a new review
-     * @apiName SubmitSearch
-     * @apiGroup Search
-     * @apiVersion  1.0.0
-     * @apiPermission USER
-     */
     public async submitSearch(req: AuthRequest, res: Response): Promise<void> {
         const submitReviewValidationSchema = J.object({
             latitude: J.number().min(-90).max(90),
@@ -21,16 +15,37 @@ export default class SearchService {
             city: J.string().trim(),
         }).xor('city', 'latitude');
 
-        return await middleware(req, res, {
+        return await serviceAuthWrapper(req, res, {
             bodyValidation: submitReviewValidationSchema,
             roles: [UserRoles.USER],
             validateToken: true,
             handler: async (req: AuthRequest, res: Response, manager: EntityManager) => {
-                console.log('mock search');
 
-                return res.status(201).send({
-                    message: 'A new searched was created',
-                });
+                const { latitude, longitude, city } = req.body;
+                const google_places_adapter = GooglePlacesAdapter.getInstance();
+
+                if (city) {
+                    const places = await google_places_adapter.fetchRestaurantsWithTextSearch(
+                        req.body.city,
+                    )
+    
+                    return res.status(201).send({
+                        message: 'A new searched was created',
+                        places: places,
+                    });
+                }
+                if (latitude && longitude) {
+                    const places = await google_places_adapter.fetchRestaurantsWithNearbySearch(
+                        req.body.latitude,
+                        req.body.longitude,
+                    )
+    
+                    return res.status(201).send({
+                        message: 'A new searched was created',
+                        places: places,
+                    });
+                }
+                
             },
         });
     }

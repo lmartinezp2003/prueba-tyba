@@ -1,18 +1,19 @@
 {
     "compilerOptions": {
-        "sourceMap": true,
-        "target": "esnext",
-        "module": "commonjs",
-        "outDir": "./dist",
-        "baseUrl": "./src",
-        "alwaysStrict": true,
-        "noImplicitAny": false,
-        "experimentalDecorators": true,
-        "emitDecoratorMetadata": true,
-        "allowSyntheticDefaultImports": true,
-        "moduleResolution": "node",
-        "typeRoots": ["./node_modules/@types"]
+      "sourceMap": true,
+      "target": "esnext",
+      "module": "commonjs",
+      "outDir": "./dist",
+      "baseUrl": "./src",
+      "alwaysStrict": true,
+      "noImplicitAny": false,
+      "experimentalDecorators": true,
+      "emitDecoratorMetadata": true,
+      "allowSyntheticDefaultImports": true,
+      "moduleResolution": "node",
+      "typeRoots": ["./node_modules/@types"],
+      "types": []
     },
     "include": ["src/**/*.ts", "./*.*.ts", "jest.config.js"],
     "exclude": ["node_modules"]
-}
+  }  

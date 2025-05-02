@@ -1,7 +1,7 @@
 import 'dotenv/config';
 import * as express from 'express';
 import { EntityManager } from 'typeorm';
-import errorMiddleware from './middleware/error';
+import errorMiddleware from './wrapper/error';
 import { DatabaseConnection } from './database/db';
 import { Server } from 'http';
 import { AppController, AppService, Controller } from './common/appCommonTypes';

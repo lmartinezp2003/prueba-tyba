@@ -1,38 +1,15 @@
 import { Request, Response } from 'express';
 import * as J from 'joi';
 import { EntityManager } from 'typeorm';
-import { middleware } from '../../middleware/auth';
+import { serviceAuthWrapper } from '../../wrapper/auth';
 import { generateJWT, getHashedPassword, passwordMatch } from '../../utils/encryption';
 import HttpError from '../../utils/exception';
 import { UserLogInRequest, UserSignUpRequest } from './userTypes';
 import { User, UserRoles } from '../../entities/User';
 import { AuthRequest } from '../../common/authCommonTypes';
+import { blacklistToken } from '../../wrapper/auth';
 
 export default class UsersService {
-    /**
-     * @api {POST} /users/register Registers a new user
-     * @apiName RegisterUser
-     * @apiGroup Auth
-     * @apiVersion  1.0.0
-     * @apiPermission PUBLIC
-     * @apiParam  {String} [username] User name
-     * @apiParam  {String} [email] User email
-     * @apiParam  {String} [password] User password
-     * @apiParam  {String} [passwordConfirmation] User password confirmation
-     * @apiSuccess (201) {String} token JWT token
-     * @apiSuccess (201) {String} username User name
-     * @apiSuccess (201) {String} email User email
-     * @apiError (400) {String} message Error registering user
-     * @apiError (400) {String} message Passwords dont match
-     * @apiError (400) {String} message User already exists
-     * @apiError (500) {String} message Internal server error
-     * @apiSuccessExample {json} Success-Response:
-     * {
-     *      "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9. ..."
-     *      "username": "ivangarl",
-     *      "email": "ivangarl@yopmail.com",
-     * }
-     */
     public async register(req: AuthRequest, res: Response): Promise<void> {
         const signUpValidationSchema = J.object({
             username: J.string().required(),
@@ -40,7 +17,7 @@ export default class UsersService {
             password: J.string().min(10).required(),
             passwordConfirmation: J.string().min(10).required(),
         });
-        return await middleware(req, res, {
+        return await serviceAuthWrapper(req, res, {
             bodyValidation: signUpValidationSchema,
             validateToken: false,
             handler: async (req: Request, res: Response, manager: EntityManager) => {
@@ -91,34 +68,12 @@ export default class UsersService {
         });
     }
 
-    /**
-     * @api {POST} /users/login Logs in a user
-     * @apiName LogInUser
-     * @apiGroup Auth
-     * @apiVersion  1.0.0
-     * @apiPermission PUBLIC
-     * @apiParam  {String} email User email
-     * @apiParam  {String} password User password
-     * @apiSuccess (200) {String} token JWT token
-     * @apiSuccess (200) {String} email User email
-     * @apiSuccess (200) {String} username User name
-     * @apiError (400) {String} message Error logging in user
-     * @apiError (404) {String} message User does not exist
-     * @apiError (400) {String} message Passwords dont match
-     * @apiError (500) {String} message Internal server error
-     * @apiSuccessExample {json} Success-Response:
-     * {
-     *      "token": "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9. ..."
-     *      "username": "ivangarl",
-     *      "email": "ivangarl@yopmail.com",
-     * }
-     */
     public async logIn(req: AuthRequest, res: Response): Promise<void> {
         const logInValidationSchema = J.object({
             email: J.string().email().required(),
             password: J.string().min(10).required(),
         });
-        return await middleware(req, res, {
+        return await serviceAuthWrapper(req, res, {
             bodyValidation: logInValidationSchema,
             validateToken: false,
             handler: async (req: Request, res: Response, manager: EntityManager) => {
@@ -140,6 +95,22 @@ export default class UsersService {
                     email: user.email,
                 });
             },
+        });
+    }
+
+    public async logout(req: AuthRequest, res: Response): Promise<void> {
+        return await serviceAuthWrapper(req, res, {
+            validateToken: true,
+            handler: async (req: AuthRequest, res: Response) => {
+                const token = req.headers.authorization!;
+                const exp = req.decodedToken.exp;
+                const now = Math.floor(Date.now() / 1000);
+                const ttl = Math.max(0, exp - now);
+
+                await blacklistToken(token, ttl);
+
+                return res.status(200).send({ message: "Logged out and token revoked" });
+            }
         });
     }
 }

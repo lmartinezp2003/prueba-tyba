@@ -8,7 +8,7 @@ export interface DecodedToken {
   userId: string;
   email: string;
   role: UserRoles;
-  exp: Date;
+  exp: number;
 }
 
 /**
