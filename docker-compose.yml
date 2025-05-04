@@ -4,7 +4,7 @@ services:
   db:
     image: postgres
     ports:
-      - "5435:5434"
+      - "5432"
     environment:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "postgres"
@@ -15,7 +15,7 @@ services:
   db_test:
     image: postgres
     ports:
-      - "5435:5434"
+      - "5432"
     environment:
       POSTGRES_USER: "postgres"
       POSTGRES_PASSWORD: "postgres"
@@ -33,6 +33,9 @@ services:
 
   backend_app:
     build: .
+    environment:
+      - DB_HOST=db
+      - REDIS_HOST=redis
     depends_on:
       - db
       - redis
