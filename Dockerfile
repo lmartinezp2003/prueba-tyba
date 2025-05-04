@@ -10,6 +10,7 @@ RUN npm run build
 FROM node:18
 WORKDIR /usr/app
 COPY package*.json ./
+COPY .env .env
 RUN npm install --only=production
 
 COPY --from=builder /usr/app/dist ./dist
