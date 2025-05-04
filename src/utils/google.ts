@@ -1,4 +1,18 @@
-import { protos, PlacesClient } from "@googlemaps/places";
+import axios from 'axios';
+
+class GooglePlaseRestaurantResponseDTO {
+    places: {
+        formattedAddress: string;
+        location: {
+            latitude: number;
+            longitude: number;
+        };
+        displayName: {
+            text: string;
+            language: string;
+        };
+    }[];
+}
 
 class GooglePlaceReataurantResponse {
     address: string;
@@ -13,17 +27,14 @@ class GooglePlaceReataurantResponse {
         this.location = location;
     }
 }
+
 export class GooglePlacesAdapter {
-
     private static instance: GooglePlacesAdapter | null = null;
-
-    private googlePlacesClient: PlacesClient;
 
     private apiKey: string;
 
     constructor() {
-        this.apiKey = process.env.GOOGLE_API_KEY || "";
-        this.googlePlacesClient = new PlacesClient({ key: this.apiKey });
+        this.apiKey = process.env.GOOGLE_API_KEY || '';
     }
 
     public static getInstance(): GooglePlacesAdapter {
@@ -33,66 +44,57 @@ export class GooglePlacesAdapter {
         return this.instance;
     }
 
-    public async fetchRestaurantsWithTextSearch(city: string): Promise<GooglePlaceReataurantResponse[] | undefined> {
-        const [response, _] = await this.googlePlacesClient.searchText({
-            textQuery: "Restaurants nearby " + city,
-            includedType: 'restaurant',
-            maxResultCount: 10,
-        }, {
-            otherArgs: {
-                headers: {
-                    'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.location'
-                }
-            }
+    public async fetchRestaurantsWithTextSearch(city: string) {
+        const payload = {
+            textQuery: 'Restaurants nearby: ' + city,
+            pageSize: 20,
+        };
+
+        const response = await axios.post('https://places.googleapis.com/v1/places:searchText', payload, {
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Goog-Api-Key': this.apiKey,
+                'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.location,nextPageToken',
+            },
         });
 
-        return response.places?.map((place) => {
-            return new GooglePlaceReataurantResponse(
-                place.formattedAddress || "",
-                place.displayName.text || "",
-                {
-                    latitude: place.location?.latitude || 0,
-                    longitude: place.location?.longitude || 0,
-                }
-            )
-        })
+        const places = (response.data as GooglePlaseRestaurantResponseDTO).places.map((place: any) => {
+            return new GooglePlaceReataurantResponse(place.formattedAddress, place.displayName.text, place.location);
+        });
+
+        return places;
     }
 
-    public async fetchRestaurantsWithNearbySearch(latitude: number, longitude: number): Promise<GooglePlaceReataurantResponse[] | undefined> {
-        const [response, _] = await this.googlePlacesClient.searchNearby(
-            {
-                includedTypes: ['restaurant'],
-                maxResultCount: 10,
-                locationRestriction: {
-                    circle: {
-                        center: {
-                            latitude: latitude,
-                            longitude: longitude,
-                        },
-                        radius: 1000,
+    public async fetchRestaurantsWithNearbySearch(
+        latitude: number,
+        longitude: number,
+    ): Promise<GooglePlaceReataurantResponse[] | undefined> {
+        const payload = {
+            includedTypes: ['restaurant'],
+            maxResultCount: 20,
+            locationRestriction: {
+                circle: {
+                    center: {
+                        latitude: latitude,
+                        longitude: longitude,
                     },
+                    radius: 500.0,
                 },
-                rankPreference: "DISTANCE",
             },
-            {
-                otherArgs: {
-                    headers: {
-                        'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.location'
-                    }
-                }   
-            }
-        );
+        };
 
-        return response.places?.map((place) => {
-            return new GooglePlaceReataurantResponse(
-                place.formattedAddress || "",
-                place.displayName.text || "",
-                {
-                    latitude: place.location?.latitude || 0,
-                    longitude: place.location?.longitude || 0,
-                }
-            )
-        })
+        const response = await axios.post('https://places.googleapis.com/v1/places:searchNearby', payload, {
+            headers: {
+                'Content-Type': 'application/json',
+                'X-Goog-Api-Key': this.apiKey,
+                'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.location',
+            },
+        });
+
+        const places = (response.data as GooglePlaseRestaurantResponseDTO).places.map((place: any) => {
+            return new GooglePlaceReataurantResponse(place.formattedAddress, place.displayName.text, place.location);
+        });
+
+        return places;
     }
-
 }
