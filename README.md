@@ -18,6 +18,9 @@
 
 ## Instructions to run the backend server
 
+### Deploy with docker.  
+    just run ```docker-compose up -d``` in terminal in the root directory
+
 ### Deploy on local machine
 
 1. **PostgreSQL Setup**
