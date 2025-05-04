@@ -26,20 +26,23 @@ export default class SearchService {
                 const google_places_adapter = GooglePlacesAdapter.getInstance();
 
                 if (city) {
-                    const places = await google_places_adapter.fetchRestaurantsWithTextSearch(
-                        req.body.city,
-                    )
+                    const places = await google_places_adapter.fetchRestaurantsWithTextSearch(req.body.city);
 
-                    const closesPlace = places[0].location;
+                    if (places.length === 0) {
+                        return res.status(404).send({
+                            message: 'No places found',
+                        });
+                    }
+
+                    const closestPlace = places[0].location;
                     const newSearch = new Search({
                         userId: userId,
-                        latitude: closesPlace.latitude,
-                        longitude: closesPlace.longitude,
+                        latitude: closestPlace.latitude,
+                        longitude: closestPlace.longitude,
                         city: req.body.city,
-                    })
+                    });
                     await manager.save(newSearch);
 
-    
                     return res.status(201).send({
                         message: 'A new searched was created',
                         places: places,
@@ -49,21 +52,27 @@ export default class SearchService {
                     const places = await google_places_adapter.fetchRestaurantsWithNearbySearch(
                         req.body.latitude,
                         req.body.longitude,
-                    )
+                    );
+
+                    if (places.length === 0) {
+                        return res.status(404).send({
+                            message: 'No places found',
+                        });
+                    }
 
                     const newSearch = new Search({
                         userId: userId,
                         latitude: req.body.latitude,
                         longitude: req.body.longitude,
-                    })
+                    });
+
                     await manager.save(newSearch);
-    
+
                     return res.status(201).send({
                         message: 'A new searched was created',
                         places: places,
                     });
                 }
-                
             },
         });
     }
@@ -89,17 +98,19 @@ export default class SearchService {
                         createdAt: 'DESC',
                     },
                     take: 10,
-                    skip: (Number(page ?? 1)) * 10,
+                    skip: (Number(page ?? 1) - 1) * 10,
                 });
+
                 if (searches.length === 0) {
                     return res.status(404).send({
                         message: 'No searches found',
                     });
                 }
 
-
                 return res.status(200).send({
                     searches,
+                    pages: Math.ceil(searches.length / 10),
+                    currentPage: Number(page ?? 1),
                 });
             },
         });
