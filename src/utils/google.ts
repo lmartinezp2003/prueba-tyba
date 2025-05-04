@@ -58,6 +58,13 @@ export class GooglePlacesAdapter {
             },
         });
 
+        console.log('Google Places response:', response.data);
+
+        if (!response.data || !response.data.places) {
+            console.error('Invalid response from Google Places API:', response.data);
+            return [];
+        }
+
         const places = (response.data as GooglePlaseRestaurantResponseDTO).places.map((place: any) => {
             return new GooglePlaceReataurantResponse(place.formattedAddress, place.displayName.text, place.location);
         });
@@ -90,6 +97,13 @@ export class GooglePlacesAdapter {
                 'X-Goog-FieldMask': 'places.displayName,places.formattedAddress,places.location',
             },
         });
+
+        console.log('Google Places response:', response.data);
+
+        if (!response.data || !response.data.places) {
+            console.error('Invalid response from Google Places API:', response.data);
+            return [];
+        }
 
         const places = (response.data as GooglePlaseRestaurantResponseDTO).places.map((place: any) => {
             return new GooglePlaceReataurantResponse(place.formattedAddress, place.displayName.text, place.location);
